@@ -1,278 +1,83 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Student Placement Dashboard</title>
+  <title>Full Card Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #111;
+      color: white;
+      text-align: center;
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    h2 {
+      margin-top: 20px;
+    }
 
-<style>
-body{
-font-family:Arial,sans-serif;
-margin:0;
-background:#f5f7fa;
-}
+    .card {
+      width: 90vw;
+      height: 60vh;
+      margin: 20px auto;
+      background: white;
+      color: black;
+      font-size: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.4);
+    }
 
-.header{
-background:#0f172a;
-color:white;
-padding:15px;
-text-align:center;
-font-size:28px;
-font-weight:bold;
-}
+    .buttons {
+      margin-top: 20px;
+    }
 
-.filters{
-display:flex;
-flex-wrap:wrap;
-gap:10px;
-padding:15px;
-background:white;
-box-shadow:0 2px 5px rgba(0,0,0,.1);
-}
+    button {
+      padding: 15px 25px;
+      margin: 10px;
+      font-size: 20px;
+      border-radius: 10px;
+    }
 
-select,input{
-padding:8px;
-border:1px solid #ccc;
-border-radius:5px;
-}
-
-.cards{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-gap:15px;
-padding:15px;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:10px;
-text-align:center;
-box-shadow:0 2px 5px rgba(0,0,0,.1);
-}
-
-.card h2{
-margin:0;
-color:#2563eb;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-background:white;
-}
-
-th{
-background:#2563eb;
-color:white;
-padding:10px;
-}
-
-td{
-padding:8px;
-border:1px solid #ddd;
-}
-
-.container{
-padding:15px;
-overflow:auto;
-}
-</style>
+    #result {
+      font-size: 28px;
+      margin-top: 20px;
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="header">
-Student Placement Dashboard
+<h2>🃏 Card Guess Game</h2>
+
+<div class="card" id="card">5</div>
+
+<div class="buttons">
+  <button onclick="newCard()">New Card</button>
+  <button onclick="guess('inside')">Inside</button>
+  <button onclick="guess('outside')">Outside</button>
 </div>
 
-<div class="cards">
-<div class="card">
-<h2 id="totalStudents">0</h2>
-<p>Total Students</p>
-</div>
-
-<div class="card">
-<h2 id="placedStudents">0</h2>
-<p>Placed Students</p>
-</div>
-
-<div class="card">
-<h2 id="companies">0</h2>
-<p>Companies</p>
-</div>
-
-<div class="card">
-<h2 id="highestPackage">0</h2>
-<p>Highest Package</p>
-</div>
-</div>
-
-<div class="filters">
-<input type="text" id="search" placeholder="Search Student">
-
-<select id="branchFilter">
-<option value="">All Branches</option>
-</select>
-
-<select id="companyFilter">
-<option value="">All Companies</option>
-</select>
-
-<select id="batchFilter">
-<option value="">All Batches</option>
-</select>
-</div>
-
-<div class="container">
-<table id="dataTable">
-<thead></thead>
-<tbody></tbody>
-</table>
-</div>
+<h3 id="result"></h3>
 
 <script>
+let number = 5;
 
-const csvUrl =
-"https://docs.google.com/spreadsheets/d/1wB72mFM70AToOAfPmAJepm9IR8HH0lV4M2sVsap3ZnM/export?format=csv";
-
-let allData=[];
-
-Papa.parse(csvUrl,{
-download:true,
-header:true,
-complete:function(results){
-
-allData=results.data;
-
-createFilters();
-renderTable(allData);
-updateCards(allData);
-
-}
-});
-
-function createFilters(){
-
-let branches=[...new Set(allData.map(x=>x.Branch))];
-let companies=[...new Set(allData.map(x=>x.Company))];
-let batches=[...new Set(allData.map(x=>x.Batch))];
-
-branches.forEach(v=>{
-if(v){
-branchFilter.innerHTML+=`<option>${v}</option>`;
-}
-});
-
-companies.forEach(v=>{
-if(v){
-companyFilter.innerHTML+=`<option>${v}</option>`;
-}
-});
-
-batches.forEach(v=>{
-if(v){
-batchFilter.innerHTML+=`<option>${v}</option>`;
-}
-});
-
+function newCard() {
+  number = Math.floor(Math.random() * 10) + 1;
+  document.getElementById("card").innerText = number;
+  document.getElementById("result").innerText = "";
 }
 
-function renderTable(data){
-
-if(data.length==0) return;
-
-let headers=Object.keys(data[0]);
-
-let thead="<tr>";
-
-headers.forEach(h=>{
-thead+=`<th>${h}</th>`;
-});
-
-thead+="</tr>";
-
-document.querySelector("#dataTable thead").innerHTML=thead;
-
-let rows="";
-
-data.forEach(row=>{
-
-rows+="<tr>";
-
-headers.forEach(h=>{
-rows+=`<td>${row[h]||''}</td>`;
-});
-
-rows+="</tr>";
-
-});
-
-document.querySelector("#dataTable tbody").innerHTML=rows;
+function guess(type) {
+  if (number <= 5 && type === "inside") {
+    document.getElementById("result").innerText = "🎉 Correct!";
+  } else if (number > 5 && type === "outside") {
+    document.getElementById("result").innerText = "🎉 Correct!";
+  } else {
+    document.getElementById("result").innerText = "❌ Wrong!";
+  }
 }
-
-function updateCards(data){
-
-document.getElementById("totalStudents").innerText=data.length;
-
-document.getElementById("placedStudents").innerText=data.filter(
-x=>x.Company && x.Company!=""
-).length;
-
-let companies=[...new Set(data.map(x=>x.Company).filter(Boolean))];
-
-document.getElementById("companies").innerText=companies.length;
-
-let maxPackage=Math.max(
-...data.map(x=>parseFloat(x["Salary package"])||0)
-);
-
-document.getElementById("highestPackage").innerText=maxPackage;
-}
-
-function applyFilters(){
-
-let search=document.getElementById("search").value.toLowerCase();
-
-let branch=document.getElementById("branchFilter").value;
-
-let company=document.getElementById("companyFilter").value;
-
-let batch=document.getElementById("batchFilter").value;
-
-let filtered=allData.filter(row=>{
-
-let matchSearch=
-JSON.stringify(row).toLowerCase().includes(search);
-
-let matchBranch=
-!branch || row.Branch==branch;
-
-let matchCompany=
-!company || row.Company==company;
-
-let matchBatch=
-!batch || row.Batch==batch;
-
-return matchSearch &&
-matchBranch &&
-matchCompany &&
-matchBatch;
-
-});
-
-renderTable(filtered);
-updateCards(filtered);
-
-}
-
-search.addEventListener("input",applyFilters);
-branchFilter.addEventListener("change",applyFilters);
-companyFilter.addEventListener("change",applyFilters);
-batchFilter.addEventListener("change",applyFilters);
-
 </script>
 
 </body>
